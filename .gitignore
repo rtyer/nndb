@@ -22,3 +22,6 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+sr28asc/*
+.DS_STORE
