@@ -23,5 +23,5 @@ _testmain.go
 *.test
 *.prof
 
-sr28asc/*
+sr28asc*
 .DS_STORE
