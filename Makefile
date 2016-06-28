@@ -33,4 +33,4 @@ build: fmt vet lint
 	@go build  -o bin/nndb
 
 test: fmt vet lint
-	@go test -cover
+	@go test `glide nv` -cover
