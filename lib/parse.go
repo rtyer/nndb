@@ -11,25 +11,26 @@ type dataType int
 
 const (
 	fdGroupType dataType = iota
+	unknown
 )
 
-type readerParser struct {
+type scannerParser struct {
 	scanner  *bufio.Scanner
 	dataType dataType
 }
 
-func newReaderParser(reader io.Reader, dataType dataType) (parser, error) {
-	return readerParser{
+func newFdGroupParser(reader io.Reader) (parser, error) {
+	return scannerParser{
 		scanner:  bufio.NewScanner(reader),
-		dataType: dataType,
+		dataType: fdGroupType,
 	}, nil
 }
 
 type parser interface {
-	parse() (interface{}, error)
+	parse() (interface{}, dataType, error)
 }
 
-func (parser readerParser) parse() (interface{}, error) {
+func (parser scannerParser) parse() (interface{}, dataType, error) {
 	switch parser.dataType {
 	case fdGroupType:
 		groups := []fdGroup{}
@@ -41,9 +42,9 @@ func (parser readerParser) parse() (interface{}, error) {
 				description: strings.Trim(tokens[1], "~"),
 			})
 		}
-		return groups, nil
+		return groups, parser.dataType, nil
 	default:
-		return nil, errors.New("Unsupported dataType")
+		return nil, unknown, errors.New("Unsupported dataType")
 	}
 }
 
