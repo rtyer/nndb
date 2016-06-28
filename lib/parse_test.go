@@ -6,7 +6,9 @@ import (
 )
 
 func TestParseFoodGroup(t *testing.T) {
-	parser, error := newReaderParser(strings.NewReader("hi"), fdGroupType)
+	input := "~0100~^~Dairy and Egg Products~\n~0200~^~Spices and Herbs~\n"
+	parser, error := newReaderParser(strings.NewReader(input), fdGroupType)
+
 	if error != nil {
 		t.Errorf(`newReaderParser returned an error %v`, error)
 	}

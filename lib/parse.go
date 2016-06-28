@@ -2,7 +2,9 @@ package nndb
 
 import (
 	"bufio"
+	"errors"
 	"io"
+	"strings"
 )
 
 type dataType int
@@ -28,12 +30,21 @@ type parser interface {
 }
 
 func (parser readerParser) parse() (interface{}, error) {
-	// parse from info.reader into data
-	// parse strategy depends on format
-	return fdGroup{
-		code:        "12345",
-		description: "it's a thing",
-	}, nil
+	switch parser.dataType {
+	case fdGroupType:
+		groups := []fdGroup{}
+		for parser.scanner.Scan() {
+			line := parser.scanner.Text()
+			tokens := strings.Split(line, "^")
+			groups = append(groups, fdGroup{
+				code:        strings.Trim(tokens[0], "~"),
+				description: strings.Trim(tokens[1], "~"),
+			})
+		}
+		return groups, nil
+	default:
+		return nil, errors.New("Unsupported dataType")
+	}
 }
 
 type fdGroup struct {
