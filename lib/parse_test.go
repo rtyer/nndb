@@ -59,7 +59,7 @@ func TestParseWrongFileFormat(t *testing.T) {
 }
 
 func TestParseEmptyDataOK(t *testing.T) {
-	input := "blahblah"
+	input := ""
 	parser, _ := newFdGroupParser(strings.NewReader(input))
 	_, _, error := parser.parse()
 
