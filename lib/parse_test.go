@@ -36,4 +36,14 @@ func TestParseFoodGroup(t *testing.T) {
 	if groups[0].code != "0100" {
 		t.Error(`incorect value for foodGroups[0].code`)
 	}
+	if groups[0].description != "Dairy and Egg Products" {
+		t.Error(`incorect value for foodGroups[0].code`)
+	}
+
+	if groups[1].code != "0200" {
+		t.Error(`incorect value for foodGroups[0].code`)
+	}
+	if groups[1].description != "Spices and Herbs" {
+		t.Error(`incorect value for foodGroups[0].code`)
+	}
 }
