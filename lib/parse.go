@@ -37,6 +37,9 @@ func (parser scannerParser) parse() (interface{}, dataType, error) {
 		for parser.scanner.Scan() {
 			line := parser.scanner.Text()
 			tokens := strings.Split(line, "^")
+			if len(tokens) != 2 {
+				return nil, unknown, errors.New("Invalid Format")
+			}
 			groups = append(groups, fdGroup{
 				code:        strings.Trim(tokens[0], "~"),
 				description: strings.Trim(tokens[1], "~"),

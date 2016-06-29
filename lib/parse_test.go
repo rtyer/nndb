@@ -47,3 +47,23 @@ func TestParseFoodGroup(t *testing.T) {
 		t.Error(`incorect value for foodGroups[0].code`)
 	}
 }
+
+func TestParseWrongFileFormat(t *testing.T) {
+	input := "blahblah"
+	parser, _ := newFdGroupParser(strings.NewReader(input))
+	_, _, error := parser.parse()
+
+	if error == nil {
+		t.Error(`invalid data should cause error`)
+	}
+}
+
+func TestParseEmptyDataOK(t *testing.T) {
+	input := "blahblah"
+	parser, _ := newFdGroupParser(strings.NewReader(input))
+	_, _, error := parser.parse()
+
+	if error != nil {
+		t.Error(`empty data should not cause error`)
+	}
+}
