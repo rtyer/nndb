@@ -12,7 +12,7 @@ dependencies:
 	@glide up > /dev/null 2>&1
 
 clean: 
-	@rm -rf $(NNDB_VERSION) $(NNDB_ZIP) bin
+	@rm -rf $(NNDB_VERSION) $(NNDB_ZIP) bin debug
 
 $(NNDB_ZIP): 
 	@wget $(NNDB_URL) > /dev/null 2>&1
@@ -27,10 +27,10 @@ lint:
 	@gometalinter --vendor --disable=gotype
 
 fmt:
-	@gofmt -s -w `glide nv | sed 's/\.\.\./*.go/g' | sed 's/.\///'`
+	@gofmt -s -w .
 
 build: fmt vet lint  
-	@go build  -o bin/nndb
+	@go build -o bin/nndb
 
 test: fmt vet lint
 	@go test `glide nv` -cover

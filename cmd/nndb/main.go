@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/rtyer/nndb/lib"
+	"github.com/rtyer/nndb"
 )
 
 func main() {
