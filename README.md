@@ -1,6 +1,9 @@
 # NNDB
 Go package for processing data from the National Nutritional Database.  
 
+## Status
+[![CircleCI](https://circleci.com/gh/rtyer/nndb.svg?style=svg)](https://circleci.com/gh/rtyer/nndb)
+
 ## Package Overview
 - `nndb` contains basic model information
 - `parser` contains the code necessary to parse the file formats from the National Nutritional Database into nndb model objects
