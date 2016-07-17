@@ -7,15 +7,8 @@ import (
 	"io"
 	"strconv"
 	"strings"
-)
 
-type dataType int
-
-const (
-	fdGroupType dataType = iota
-	foodType
-	nutrientType
-	unknown
+	"github.com/rtyer/nndb"
 )
 
 const (
@@ -27,136 +20,132 @@ const (
 )
 
 type scannerParser struct {
-	scanner  *bufio.Scanner
-	dataType dataType
+	foodDesScanner *bufio.Scanner
+	fdGroupScanner *bufio.Scanner
+	nutrDefScanner *bufio.Scanner
 }
 
-func newFdGroupParser(reader io.Reader) (parser, error) {
-	return scannerParser{
-		scanner:  bufio.NewScanner(reader),
-		dataType: fdGroupType,
-	}, nil
-}
-
-func newFoodDescriptionParser(reader io.Reader) (parser, error) {
-	return scannerParser{
-		scanner:  bufio.NewScanner(reader),
-		dataType: foodType,
-	}, nil
-}
-
-func newNutrientParser(reader io.Reader) (parser, error) {
-	return scannerParser{
-		scanner:  bufio.NewScanner(reader),
-		dataType: nutrientType,
-	}, nil
-}
-
-type parser interface {
-	parse() (interface{}, dataType, error)
-}
-
-func (parser scannerParser) parse() (interface{}, dataType, error) {
-	switch parser.dataType {
-	case fdGroupType:
-		groups := []fdGroup{}
-		for parser.scanner.Scan() {
-			line := parser.scanner.Text()
-			tokens := strings.Split(line, "^")
-			if len(tokens) != 2 {
-				return nil, unknown, errors.New("Invalid Format")
-			}
-			groups = append(groups, fdGroup{
-				code:        strings.Trim(tokens[0], "~"),
-				description: strings.Trim(tokens[1], "~"),
-			})
-		}
-		return groups, parser.dataType, nil
-	case foodType:
-		food := []foodDescription{}
-		for parser.scanner.Scan() {
-			line := parser.scanner.Text()
-			tokens := strings.Split(line, "^")
-			if len(tokens) != 14 {
-				return nil, unknown, errors.New("Invalid Format")
-			}
-			food = append(food, foodDescription{
-				ndbNo:            strings.Trim(tokens[0], "~"),
-				fdGroupCode:      strings.Trim(tokens[1], "~"),
-				longDescription:  strings.Trim(tokens[2], "~"),
-				shortDescription: strings.Trim(tokens[3], "~"),
-				commonName:       strings.Trim(tokens[4], "~"),
-				manufacturerName: strings.Trim(tokens[5], "~"),
-			})
-		}
-		return food, parser.dataType, nil
-	case nutrientType:
-		// get first field, look up in map
-		// if not present, add new empty
-		// set the value for the field if it is one we care about
-		// when done with all lines, create a slice of values
-		nutrientMap := make(map[string]nutrientDescription)
-		for parser.scanner.Scan() {
-			line := parser.scanner.Text()
-			tokens := strings.Split(line, "^")
-			if len(tokens) != 18 {
-				return nil, unknown, errors.New("Invalid Format")
-			}
-			ndbNo := strings.Trim(tokens[0], "~")
-			nutrientID := strings.Trim(tokens[1], "~")
-			if isValidNutrient(nutrientID) {
-				nutrient, _ := nutrientMap[ndbNo]
-
-				f, err := strconv.ParseFloat(strings.Trim(tokens[2], "~"), 64)
-				if err != nil {
-					return nil, parser.dataType, fmt.Errorf("Could not parse nutrient value for %v", nutrientID)
-				}
-				switch nutrientID {
-				case calories:
-					nutrient.calories = f
-				case fat:
-					nutrient.fat = f
-				case sugar:
-					nutrient.sugar = f
-				case fiber:
-					nutrient.fiber = f
-				case protein:
-					nutrient.protein = f
-				}
-				nutrientMap[ndbNo] = nutrient
-			}
-		}
-		var nutrients []nutrientDescription
-		for k := range nutrientMap {
-			nutrients = append(nutrients, nutrientMap[k])
-		}
-		return nutrients, parser.dataType, nil
-
-	default:
-		return nil, unknown, errors.New("Unsupported dataType")
+// NewParser returns a parser configured for the passed readers. All readers must be non-nil or an error will be returned.
+func NewParser(foodDesReader io.Reader, fdGroupReader io.Reader, nutrDefReader io.Reader) (Parser, error) {
+	if foodDesReader == nil || fdGroupReader == nil || nutrDefReader == nil {
+		return nil, errors.New("All readers must be valid")
 	}
+	return scannerParser{
+		foodDesScanner: bufio.NewScanner(foodDesReader),
+		fdGroupScanner: bufio.NewScanner(fdGroupReader),
+		nutrDefScanner: bufio.NewScanner(nutrDefReader),
+	}, nil
+
 }
 
-type fdGroup struct {
-	code        string
-	description string
+// Parser provides the means to convert from the National Nutrient Database file formats into a []nndb.Food
+type Parser interface {
+	parseFoodGroups() (map[int]nndb.FoodGroup, error)
+	parseNutrients() (map[int]nndb.Nutrients, error)
+	Parse() ([]nndb.Food, error)
 }
 
-type foodDescription struct {
-	ndbNo            string
-	fdGroupCode      string
-	longDescription  string
-	shortDescription string
-	commonName       string
-	manufacturerName string
+// parseFoodGroups is an internal method that will return a map of food group code/id : nndb.FoodGroup parsed from the scanner
+func (parser scannerParser) parseFoodGroups() (map[int]nndb.FoodGroup, error) {
+	groups := make(map[int]nndb.FoodGroup)
+	for parser.fdGroupScanner.Scan() {
+		line := parser.fdGroupScanner.Text()
+		tokens := strings.Split(line, "^")
+		if len(tokens) != 2 {
+			return nil, errors.New("Invalid Format")
+		}
+
+		id, err := strconv.Atoi(strings.Trim(tokens[0], "~"))
+		if err != nil {
+			return nil, err
+		}
+
+		groups[id] = nndb.FoodGroup{
+			ID:   id,
+			Name: strings.Trim(tokens[1], "~"),
+		}
+	}
+	return groups, nil
 }
 
-type nutrientDescription struct {
-	calories float64
-	fat      float64
-	sugar    float64
-	protein  float64
-	fiber    float64
+// parseNutrients is an internal method that will return a map of ndbNO/nndb.Food.ID : nndb.Nutrients parsed from the scanner
+func (parser scannerParser) parseNutrients() (map[int]nndb.Nutrients, error) {
+	nutrientMap := make(map[int]nndb.Nutrients)
+	for parser.nutrDefScanner.Scan() {
+		line := parser.nutrDefScanner.Text()
+		tokens := strings.Split(line, "^")
+		if len(tokens) != 18 {
+			return nil, errors.New("Invalid Format")
+		}
+
+		id, err := strconv.Atoi(strings.Trim(tokens[0], "~"))
+		if err != nil {
+			return nil, err
+		}
+
+		nutrientID := strings.Trim(tokens[1], "~")
+
+		if isValidNutrient(nutrientID) {
+			nutrient, _ := nutrientMap[id]
+
+			f, err := strconv.ParseFloat(strings.Trim(tokens[2], "~"), 64)
+			if err != nil {
+				return nil, fmt.Errorf("Could not parse nutrient value for %v", nutrientID)
+			}
+
+			switch nutrientID {
+			case calories:
+				nutrient.Calories = f
+			case fat:
+				nutrient.Fat = f
+			case sugar:
+				nutrient.Sugar = f
+			case fiber:
+				nutrient.Fiber = f
+			case protein:
+				nutrient.Protein = f
+			}
+			nutrientMap[id] = nutrient
+		}
+	}
+	return nutrientMap, nil
+}
+
+func (parser scannerParser) Parse() ([]nndb.Food, error) {
+	foodGroups, err := parser.parseFoodGroups()
+	if err != nil {
+		return nil, err
+	}
+	nutrients, err := parser.parseNutrients()
+	if err != nil {
+		return nil, err
+	}
+
+	food := []nndb.Food{}
+	for parser.foodDesScanner.Scan() {
+		line := parser.foodDesScanner.Text()
+		tokens := strings.Split(line, "^")
+		if len(tokens) != 14 {
+			return nil, errors.New("Invalid Format")
+		}
+		id, err := strconv.Atoi(strings.Trim(tokens[0], "~"))
+		if err != nil {
+			return nil, err
+		}
+		foodGroupID, err := strconv.Atoi(strings.Trim(tokens[1], "~"))
+		if err != nil {
+			return nil, err
+		}
+		food = append(food, nndb.Food{
+			ID:            id,
+			FoodGroup:     foodGroups[foodGroupID],
+			Name:          strings.Trim(tokens[2], "~"),
+			AlternateName: strings.Trim(tokens[3], "~"),
+			Manufacturer:  strings.Trim(tokens[5], "~"),
+			Nutrients:     nutrients[id],
+		})
+	}
+	return food, nil
 }
 
 func isValidNutrient(nutrientID string) bool {

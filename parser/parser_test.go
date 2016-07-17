@@ -5,8 +5,7 @@ import (
 	"testing"
 )
 
-func TestParseNutrientDescription(t *testing.T) {
-	input := `~01001~^~203~^0.85^16^0.074^~1~^~~^~~^~~^^^^^^^~~^11/1976^
+var nutrientInput = `~01001~^~203~^0.85^16^0.074^~1~^~~^~~^~~^^^^^^^~~^11/1976^
 ~01001~^~204~^81.11^580^0.065^~1~^~~^~~^~~^^^^^^^~~^11/1976^
 ~01001~^~205~^0.06^0^^~4~^~NC~^~~^~~^^^^^^^~~^11/1976^
 ~01001~^~207~^2.11^35^0.054^~1~^~~^~~^~~^^^^^^^~~^11/1976^
@@ -18,51 +17,69 @@ func TestParseNutrientDescription(t *testing.T) {
 ~01001~^~268~^2999^0^^~4~^~NC~^~~^~~^^^^^^^~~^09/2015^
 ~01001~^~269~^0.06^0^^~4~^~NR~^~~^~~^^^^^^^~~^11/2002^
 ~01001~^~291~^0.0^0^^~4~^~~^~~^~~^^^^^^^~~^^
-~01001~^~301~^24^17^0.789^~1~^~A~^~~^~~^7^19^30^4^22.021^26.496^~2, 3~^11/2002^`
+~01001~^~301~^24^17^0.789^~1~^~A~^~~^~~^7^19^30^4^22.021^26.496^~2, 3~^11/2002^
+~01002~^~208~^555^0^^~4~^~NC~^~~^~~^^^^^^^~~^08/2010^
+~01116~^~203~^3.47^0^^~1~^~~^~~^~~^^^^^^^~~^11/1976^
+~01116~^~204~^3.25^0^^~1~^~~^~~^~~^^^^^^^~~^11/1976^
+~01116~^~205~^4.66^0^^~4~^~NC~^~~^~~^^^^^^^~~^11/1976^
+~01116~^~207~^0.72^0^^~1~^~~^~~^~~^^^^^^^~~^11/1976^
+~01116~^~208~^61^0^^~4~^~NC~^~~^~~^^^^^^^~~^02/2009^
+~01116~^~221~^0.0^0^^~7~^~~^~~^~~^^^^^^^~~^04/1985^
+~01116~^~255~^87.90^0^^~1~^~~^~~^~~^^^^^^^~~^11/1976^
+~01116~^~262~^0^0^^~7~^~Z~^~~^~~^^^^^^^~~^01/2003^
+~01116~^~263~^0^0^^~7~^~Z~^~~^~~^^^^^^^~~^01/2003^
+~01116~^~268~^257^0^^~4~^~NC~^~~^~~^^^^^^^~~^02/2009^
+~01116~^~269~^4.66^0^^~4~^~NR~^~~^~~^^^^^^^~~^01/2003^
+~01116~^~291~^0.0^0^^~4~^~~^~~^~~^^^^^^^~~^11/1976^
+`
+var foodInput = "~01116~^~0100~^~Yogurt, plain, whole milk, 8 grams protein per 8 ounce~^~YOGURT,PLN,WHL MILK,8 GRAMS PROT PER 8 OZ~^~~^~~^~Y~^~~^0^~~^6.38^4.27^8.79^3.87"
+var foodGroupInput = "~0100~^~Dairy and Egg Products~\n~0200~^~Spices and Herbs~\n"
 
-	parser, error := newNutrientParser(strings.NewReader(input))
+func TestParseNutrientDescription(t *testing.T) {
+
+	parser, error := NewParser(strings.NewReader(""), strings.NewReader(""), strings.NewReader(nutrientInput))
 	if error != nil {
 		t.Errorf(`newReaderParser returned an error %v`, error)
 	}
 	if parser == nil {
 		t.Error(`newReaderParser returned nil parser`)
 	}
-	result, dataType, error := parser.parse()
+	nutrients, error := parser.parseNutrients()
 	if error != nil {
-		t.Errorf(`parse() returned an error %v`, error)
+		t.Errorf(`Parse() returned an error %v`, error)
 	}
-	if result == nil {
+	if nutrients == nil {
 		t.Error(`parse returned nil`)
 	}
-	if dataType != nutrientType {
-		t.Error(`Wrong type`)
-	}
 
-	nutrients := result.([]nutrientDescription)
-
-	if len(nutrients) != 1 {
+	if len(nutrients) != 3 {
 		t.Errorf(`incorrect number of results %v`, len(nutrients))
 	}
-	if nutrients[0].calories != 717 {
-		t.Errorf(`incorrect amount of calories %v`, nutrients[0].calories)
+	if nutrients[1001].Calories != 717 {
+		t.Errorf(`incorrect amount of calories %v`, nutrients[1001].Calories)
 	}
-	if nutrients[0].fiber != 0 {
-		t.Errorf(`incorrect amount of fiber %v`, nutrients[0].fiber)
+	if nutrients[1001].Fiber != 0 {
+		t.Errorf(`incorrect amount of fiber %v`, nutrients[1001].Fiber)
 	}
-	if nutrients[0].fat != 81.11 {
-		t.Errorf(`incorrect amount of fiber %v`, nutrients[0].fat)
+	if nutrients[1001].Fat != 81.11 {
+		t.Errorf(`incorrect amount of fat %v`, nutrients[1001].Fat)
 	}
-	if nutrients[0].protein != 0.85 {
-		t.Errorf(`incorrect amount of fiber %v`, nutrients[0].protein)
+	if nutrients[1001].Protein != 0.85 {
+		t.Errorf(`incorrect amount of protein %v`, nutrients[1001].Protein)
 	}
-	if nutrients[0].sugar != 0.06 {
-		t.Errorf(`incorrect amount of fiber %v`, nutrients[0].sugar)
+	if nutrients[1001].Sugar != 0.06 {
+		t.Errorf(`incorrect amount of sugar %v`, nutrients[1001].Sugar)
+	}
+	if nutrients[1002].Calories != 555 {
+		t.Errorf(`incorrect amount of calories %v`, nutrients[1002].Calories)
+	}
+	if nutrients[1002].Fat != 0 {
+		t.Errorf(`incorrect amount of Fat %v`, nutrients[1002].Fat)
 	}
 }
 
-func TestParseFoodDescription(t *testing.T) {
-	input := "~01116~^~0100~^~Yogurt, plain, whole milk, 8 grams protein per 8 ounce~^~YOGURT,PLN,WHL MILK,8 GRAMS PROT PER 8 OZ~^~~^~~^~Y~^~~^0^~~^6.38^4.27^8.79^3.87"
-	parser, error := newFoodDescriptionParser(strings.NewReader(input))
+func TestParse(t *testing.T) {
+	parser, error := NewParser(strings.NewReader(foodInput), strings.NewReader(foodGroupInput), strings.NewReader(nutrientInput))
 	if error != nil {
 		t.Errorf(`newReaderParser returned an error %v`, error)
 	}
@@ -70,33 +87,33 @@ func TestParseFoodDescription(t *testing.T) {
 		t.Error(`newReaderParser returned nil parser`)
 	}
 
-	result, dataType, error := parser.parse()
+	result, error := parser.Parse()
 
 	if error != nil {
-		t.Errorf(`parse() returned an error %v`, error)
+		t.Errorf(`Parse() returned an error %v`, error)
 	}
 	if result == nil {
 		t.Error(`parse returned nil`)
 	}
-	if dataType != foodType {
-		t.Error(`Wrong type`)
-	}
-	groups := result.([]foodDescription)
 
-	if groups[0].ndbNo != "01116" {
+	groups := result
+
+	if groups[0].ID != 1116 {
 		t.Error(`incorect value for foodGroups[0].ndbNo`)
 	}
-	if groups[0].fdGroupCode != "0100" {
-		t.Error(`incorect value for foodGroups[0].fdGroupCode`)
+	if groups[0].FoodGroup.ID != 100 {
+		t.Error(`incorect food group`)
 	}
-	if groups[0].longDescription != "Yogurt, plain, whole milk, 8 grams protein per 8 ounce" {
-		t.Error(`incorect value for foodGroups[0].longDescription`)
+	if groups[0].Nutrients.Calories == 0 {
+		t.Error(`Nutrients should be present`)
+	}
+	if groups[0].Name != "Yogurt, plain, whole milk, 8 grams protein per 8 ounce" {
+		t.Error(`Incorrect value for name`)
 	}
 }
 
 func TestParseFoodGroup(t *testing.T) {
-	input := "~0100~^~Dairy and Egg Products~\n~0200~^~Spices and Herbs~\n"
-	parser, error := newFdGroupParser(strings.NewReader(input))
+	parser, error := NewParser(strings.NewReader(""), strings.NewReader(foodGroupInput), strings.NewReader(""))
 
 	if error != nil {
 		t.Errorf(`newReaderParser returned an error %v`, error)
@@ -105,52 +122,45 @@ func TestParseFoodGroup(t *testing.T) {
 		t.Error(`newReaderParser returned nil parser`)
 	}
 
-	result, dataType, error := parser.parse()
+	groups, error := parser.parseFoodGroups()
 
 	if error != nil {
-		t.Errorf(`parse() returned an error %v`, error)
+		t.Errorf(`Parse() returned an error %v`, error)
 	}
-	if result == nil {
+	if groups == nil {
 		t.Error(`parse returned nil`)
 	}
 
-	if dataType != fdGroupType {
-		t.Error(`Wrong type`)
+	if groups[100].ID != 100 {
+		t.Error(`incorect value for foodGroups[100].code`)
 	}
-	groups := result.([]fdGroup)
-
-	if groups[0].code != "0100" {
-		t.Error(`incorect value for foodGroups[0].code`)
-	}
-	if groups[0].description != "Dairy and Egg Products" {
-		t.Error(`incorect value for foodGroups[0].code`)
+	if groups[100].Name != "Dairy and Egg Products" {
+		t.Error(`incorect value for foodGroups[100].code`)
 	}
 
-	if groups[1].code != "0200" {
-		t.Error(`incorect value for foodGroups[0].code`)
+	if groups[200].ID != 200 {
+		t.Error(`incorect value for foodGroups[200].code`)
 	}
-	if groups[1].description != "Spices and Herbs" {
-		t.Error(`incorect value for foodGroups[0].code`)
+	if groups[200].Name != "Spices and Herbs" {
+		t.Error(`incorect value for foodGroups[200].code`)
 	}
 }
 
 func TestParseWrongFileFormat(t *testing.T) {
 	input := "blahblah"
-	parser, _ := newFdGroupParser(strings.NewReader(input))
-	_, _, error := parser.parse()
+	parser, _ := NewParser(strings.NewReader(input), strings.NewReader(input), strings.NewReader(input))
 
+	_, error := parser.parseFoodGroups()
 	if error == nil {
 		t.Error(`invalid data should cause error`)
 	}
-	parser, _ = newFoodDescriptionParser(strings.NewReader(input))
-	_, _, error = parser.parse()
 
+	_, error = parser.parseNutrients()
 	if error == nil {
 		t.Error(`invalid data should cause error`)
 	}
-	parser, _ = newNutrientParser(strings.NewReader(input))
-	_, _, error = parser.parse()
 
+	_, error = parser.Parse()
 	if error == nil {
 		t.Error(`invalid data should cause error`)
 	}
@@ -158,24 +168,21 @@ func TestParseWrongFileFormat(t *testing.T) {
 
 func TestParseEmptyDataOK(t *testing.T) {
 	input := ""
-	parser, _ := newFdGroupParser(strings.NewReader(input))
-	_, _, error := parser.parse()
+	parser, _ := NewParser(strings.NewReader(input), strings.NewReader(input), strings.NewReader(input))
 
+	_, error := parser.parseFoodGroups()
 	if error != nil {
 		t.Error(`empty data should not cause error`)
 	}
 
-	parser, _ = newFoodDescriptionParser(strings.NewReader(input))
-	_, _, error = parser.parse()
-
+	_, error = parser.parseNutrients()
 	if error != nil {
 		t.Error(`empty data should not cause error`)
 	}
 
-	parser, _ = newNutrientParser(strings.NewReader(input))
-	_, _, error = parser.parse()
-
+	_, error = parser.Parse()
 	if error != nil {
 		t.Error(`empty data should not cause error`)
 	}
+
 }

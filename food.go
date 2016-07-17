@@ -3,6 +3,7 @@ package nndb
 // Models representing data sourced from the National Nutrient Database
 
 // Food represents a food item
+// TODO: Add Measurements
 type Food struct {
 	ID            int
 	FoodGroup     FoodGroup
@@ -21,20 +22,20 @@ type FoodGroup struct {
 // Nutrients represents the nutritional information, such as `Calories` per 100g
 type Nutrients struct {
 	// Calories in kcal
-	Calories float32
+	Calories float64
 	// Fat in g
-	Fat float32
+	Fat float64
 	// Sugar in g
-	Sugar float32
+	Sugar float64
 	// Protein in g
-	Protein float32
+	Protein float64
 	// Fiber in g
-	Fiber float32
+	Fiber float64
 }
 
 // Measurement represents the number of grams of weight that common measurements have (per Food)
 type Measurement struct {
-	Amount float32
+	Amount float64
 	Unit   string
-	Weight float32
+	Weight float64
 }
