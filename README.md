@@ -9,6 +9,7 @@ Go package for processing data from the National Nutritional Database.
 ## Getting Started
 - Check this out to the correct location (`$GOPATH/src/github.com/rtyer/nndb`)
 - Ensure you have wget (`brew install wget`)
+- Ensure you have glide (`brew install glide`)
 - Execute `make prepare`
 
 Prepare will download go linting tools and the latest NNDB data file and unzip it.  At this point, you can run any and all commands in the Makefile.
