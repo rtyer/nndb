@@ -104,30 +104,27 @@ func (parser scannerParser) parse() (interface{}, dataType, error) {
 			}
 			ndbNo := strings.Trim(tokens[0], "~")
 			nutrientID := strings.Trim(tokens[1], "~")
-			if !isValidNutrient(nutrientID) {
-				break
+			if isValidNutrient(nutrientID) {
+				nutrient, _ := nutrientMap[ndbNo]
+
+				f, err := strconv.ParseFloat(strings.Trim(tokens[2], "~"), 64)
+				if err != nil {
+					return nil, parser.dataType, fmt.Errorf("Could not parse nutrient value for %v", nutrientID)
+				}
+				switch nutrientID {
+				case calories:
+					nutrient.calories = f
+				case fat:
+					nutrient.fat = f
+				case sugar:
+					nutrient.sugar = f
+				case fiber:
+					nutrient.fiber = f
+				case protein:
+					nutrient.protein = f
+				}
+				nutrientMap[ndbNo] = nutrient
 			}
-			nutrient, ok := nutrientMap[ndbNo]
-			if !ok {
-				nutrient = nutrientDescription{}
-			}
-			f, err := strconv.ParseFloat(strings.Trim(tokens[2], "~"), 64)
-			if err != nil {
-				return nil, parser.dataType, fmt.Errorf("Could not parse nutrient value for %v", nutrientID)
-			}
-			switch nutrientID {
-			case calories:
-				nutrient.calories = f
-			case fat:
-				nutrient.fat = f
-			case sugar:
-				nutrient.sugar = f
-			case fiber:
-				nutrient.fiber = f
-			case protein:
-				nutrient.protein = f
-			}
-			nutrientMap[nutrientID] = nutrient
 		}
 		var nutrients []nutrientDescription
 		for k := range nutrientMap {
