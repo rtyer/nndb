@@ -1,6 +1,7 @@
 package nndb
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -30,8 +31,7 @@ var nutrientInput = `~01001~^~203~^0.85^16^0.074^~1~^~~^~~^~~^^^^^^^~~^11/1976^
 ~01116~^~263~^0^0^^~7~^~Z~^~~^~~^^^^^^^~~^01/2003^
 ~01116~^~268~^257^0^^~4~^~NC~^~~^~~^^^^^^^~~^02/2009^
 ~01116~^~269~^4.66^0^^~4~^~NR~^~~^~~^^^^^^^~~^01/2003^
-~01116~^~291~^0.0^0^^~4~^~~^~~^~~^^^^^^^~~^11/1976^
-`
+~01116~^~291~^0.0^0^^~4~^~~^~~^~~^^^^^^^~~^11/1976^`
 var foodInput = "~01116~^~0100~^~Yogurt, plain, whole milk, 8 grams protein per 8 ounce~^~YOGURT,PLN,WHL MILK,8 GRAMS PROT PER 8 OZ~^~~^~~^~Y~^~~^0^~~^6.38^4.27^8.79^3.87"
 var foodGroupInput = "~0100~^~Dairy and Egg Products~\n~0200~^~Spices and Herbs~\n"
 
@@ -87,29 +87,29 @@ func TestParse(t *testing.T) {
 		t.Error(`newReaderParser returned nil parser`)
 	}
 
-	result, error := parser.Parse()
+	food, error := parser.Parse()
 
 	if error != nil {
 		t.Errorf(`Parse() returned an error %v`, error)
 	}
-	if result == nil {
+	if food == nil {
 		t.Error(`parse returned nil`)
 	}
-
-	groups := result
-
-	if groups[0].ID != 1116 {
+	if food[0].ID != 1116 {
 		t.Error(`incorect value for foodGroups[0].ndbNo`)
 	}
-	if groups[0].FoodGroup.ID != 100 {
+	if food[0].FoodGroup.ID != 100 {
 		t.Error(`incorect food group`)
 	}
-	if groups[0].Nutrients.Calories == 0 {
+	if food[0].Nutrients.Calories == 0 {
 		t.Error(`Nutrients should be present`)
 	}
-	if groups[0].Name != "Yogurt, plain, whole milk, 8 grams protein per 8 ounce" {
+	if food[0].Name != "Yogurt, plain, whole milk, 8 grams protein per 8 ounce" {
 		t.Error(`Incorrect value for name`)
 	}
+
+	fmt.Println(food[0].String())
+	fmt.Println(food[0].Fields())
 }
 
 func TestParseFoodGroup(t *testing.T) {
