@@ -1,7 +1,6 @@
 package nndb
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -107,9 +106,6 @@ func TestParse(t *testing.T) {
 	if food[0].Name != "Yogurt, plain, whole milk, 8 grams protein per 8 ounce" {
 		t.Error(`Incorrect value for name`)
 	}
-
-	fmt.Println(food[0].String())
-	fmt.Println(food[0].Fields())
 }
 
 func TestParseFoodGroup(t *testing.T) {
