@@ -38,4 +38,4 @@ compile:
 build: fmt vet lint compile
 
 test: fmt vet lint
-	@go test ./... -cover -race
+	@go test `glide nv` -cover -race
