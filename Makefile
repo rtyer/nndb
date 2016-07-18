@@ -4,7 +4,10 @@ NNDB_URL=https://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR/SR28/dnloa
 
 default: build
 
-prepare: unzip dependencies 
+prepare: unzip dependencies tools
+
+tools: 	
+	@go get -u github.com/Masterminds/glide
 	@go get -u github.com/alecthomas/gometalinter
 	@gometalinter --install --update > /dev/null 2>&1
 
@@ -29,8 +32,10 @@ lint:
 fmt:
 	@gofmt -s -w .
 
-build: fmt vet lint  
+compile: 
 	@go build -o bin/nndb
 
+build: fmt vet lint compile
+
 test: fmt vet lint
-	@go test `glide nv` -cover
+	@go test `glide nv` -cover -race
