@@ -119,6 +119,19 @@ func extractNutrientValue(nutrientID string, foodID int, nutrientMap map[int]nnd
 	return nil
 }
 
+func isValidNutrient(nutrientID string) bool {
+	switch nutrientID {
+	case
+		calories,
+		fat,
+		protein,
+		fiber,
+		sugar:
+		return true
+	}
+	return false
+}
+
 func (parser scannerParser) Parse() ([]nndb.Food, error) {
 	foodGroups, err := parser.parseFoodGroups()
 	if err != nil {
@@ -154,17 +167,4 @@ func (parser scannerParser) Parse() ([]nndb.Food, error) {
 		})
 	}
 	return food, nil
-}
-
-func isValidNutrient(nutrientID string) bool {
-	switch nutrientID {
-	case
-		calories,
-		fat,
-		protein,
-		fiber,
-		sugar:
-		return true
-	}
-	return false
 }
