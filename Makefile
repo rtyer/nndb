@@ -24,16 +24,16 @@ unzip: $(NNDB_ZIP)
 	@unzip -o $(NNDB_ZIP) -d $(NNDB_VERSION)  > /dev/null 2>&1
 
 vet: 
-	@go vet `glide novendor`
+	@go vet `glide nv`
 
 lint: 
-	@gometalinter --vendor --disable=gotype
+	@gometalinter --vendor --disable=gotype --dupl-threshold=90 ./...
 
 fmt:
 	@gofmt -s -w .
 
 compile: 
-	@go build -o bin/nndb
+	@go build `glide nv` 
 
 build: fmt vet lint compile
 

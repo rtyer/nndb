@@ -1,2 +1,4 @@
 package: github.com/rtyer/nndb
-import: []
+import:
+- package: gopkg.in/urfave/cli.v1
+  version: ^1.18.0

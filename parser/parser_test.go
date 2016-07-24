@@ -3,6 +3,8 @@ package nndb
 import (
 	"strings"
 	"testing"
+
+	"github.com/rtyer/nndb"
 )
 
 var nutrientInput = `~01001~^~203~^0.85^16^0.074^~1~^~~^~~^~~^^^^^^^~~^11/1976^
@@ -37,12 +39,8 @@ var foodGroupInput = "~0100~^~Dairy and Egg Products~\n~0200~^~Spices and Herbs~
 func TestParseNutrientDescription(t *testing.T) {
 
 	parser, error := NewParser(strings.NewReader(""), strings.NewReader(""), strings.NewReader(nutrientInput))
-	if error != nil {
-		t.Errorf(`newReaderParser returned an error %v`, error)
-	}
-	if parser == nil {
-		t.Error(`newReaderParser returned nil parser`)
-	}
+	isValidParser(parser, error, t)
+
 	nutrients, error := parser.parseNutrients()
 	if error != nil {
 		t.Errorf(`Parse() returned an error %v`, error)
@@ -50,41 +48,44 @@ func TestParseNutrientDescription(t *testing.T) {
 	if nutrients == nil {
 		t.Error(`parse returned nil`)
 	}
-
 	if len(nutrients) != 3 {
 		t.Errorf(`incorrect number of results %v`, len(nutrients))
 	}
-	if nutrients[1001].Calories != 717 {
-		t.Errorf(`incorrect amount of calories %v`, nutrients[1001].Calories)
+
+	nutrientsShouldMatch(nutrients[1001], nndb.Nutrients{Calories: 717, Fiber: 0, Fat: 81.11, Protein: 0.85, Sugar: 0.06}, t)
+	nutrientsShouldMatch(nutrients[1002], nndb.Nutrients{Calories: 555}, t)
+}
+
+func nutrientsShouldMatch(actual nndb.Nutrients, expected nndb.Nutrients, t *testing.T) {
+	if actual.Calories != expected.Calories {
+		t.Errorf(`incorrect amount of calories %v when expected %v`, actual.Calories, expected.Calories)
 	}
-	if nutrients[1001].Fiber != 0 {
-		t.Errorf(`incorrect amount of fiber %v`, nutrients[1001].Fiber)
+	if actual.Fiber != expected.Fiber {
+		t.Errorf(`incorrect amount of fiber %v when expected %v`, actual.Fiber, expected.Fiber)
 	}
-	if nutrients[1001].Fat != 81.11 {
-		t.Errorf(`incorrect amount of fat %v`, nutrients[1001].Fat)
+	if actual.Fat != expected.Fat {
+		t.Errorf(`incorrect amount of fat %v when expected %v`, actual.Fat, expected.Fat)
 	}
-	if nutrients[1001].Protein != 0.85 {
-		t.Errorf(`incorrect amount of protein %v`, nutrients[1001].Protein)
+	if actual.Protein != expected.Protein {
+		t.Errorf(`incorrect amount of protein %v when expected %v`, actual.Protein, expected.Protein)
 	}
-	if nutrients[1001].Sugar != 0.06 {
-		t.Errorf(`incorrect amount of sugar %v`, nutrients[1001].Sugar)
+	if actual.Sugar != expected.Sugar {
+		t.Errorf(`incorrect amount of sugar %v when expected %v`, actual.Sugar, expected.Sugar)
 	}
-	if nutrients[1002].Calories != 555 {
-		t.Errorf(`incorrect amount of calories %v`, nutrients[1002].Calories)
+}
+
+func isValidParser(parser Parser, e error, t *testing.T) {
+	if e != nil {
+		t.Errorf(`newReaderParser returned an error %v`, e)
 	}
-	if nutrients[1002].Fat != 0 {
-		t.Errorf(`incorrect amount of Fat %v`, nutrients[1002].Fat)
+	if parser == nil {
+		t.Error(`newReaderParser returned nil parser`)
 	}
 }
 
 func TestParse(t *testing.T) {
 	parser, error := NewParser(strings.NewReader(foodInput), strings.NewReader(foodGroupInput), strings.NewReader(nutrientInput))
-	if error != nil {
-		t.Errorf(`newReaderParser returned an error %v`, error)
-	}
-	if parser == nil {
-		t.Error(`newReaderParser returned nil parser`)
-	}
+	isValidParser(parser, error, t)
 
 	food, error := parser.Parse()
 
@@ -110,13 +111,7 @@ func TestParse(t *testing.T) {
 
 func TestParseFoodGroup(t *testing.T) {
 	parser, error := NewParser(strings.NewReader(""), strings.NewReader(foodGroupInput), strings.NewReader(""))
-
-	if error != nil {
-		t.Errorf(`newReaderParser returned an error %v`, error)
-	}
-	if parser == nil {
-		t.Error(`newReaderParser returned nil parser`)
-	}
+	isValidParser(parser, error, t)
 
 	groups, error := parser.parseFoodGroups()
 

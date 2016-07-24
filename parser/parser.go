@@ -78,37 +78,45 @@ func (parser scannerParser) parseNutrients() (map[int]nndb.Nutrients, error) {
 			return nil, errors.New("Invalid Format")
 		}
 
-		id, err := strconv.Atoi(strings.Trim(tokens[0], "~"))
+		foodID, err := strconv.Atoi(strings.Trim(tokens[0], "~"))
 		if err != nil {
 			return nil, err
 		}
 
 		nutrientID := strings.Trim(tokens[1], "~")
 
-		if isValidNutrient(nutrientID) {
-			nutrient, _ := nutrientMap[id]
-
-			f, err := strconv.ParseFloat(strings.Trim(tokens[2], "~"), 64)
-			if err != nil {
-				return nil, fmt.Errorf("Could not parse nutrient value for %v", nutrientID)
-			}
-
-			switch nutrientID {
-			case calories:
-				nutrient.Calories = f
-			case fat:
-				nutrient.Fat = f
-			case sugar:
-				nutrient.Sugar = f
-			case fiber:
-				nutrient.Fiber = f
-			case protein:
-				nutrient.Protein = f
-			}
-			nutrientMap[id] = nutrient
+		err = extractNutrientValue(nutrientID, foodID, nutrientMap, tokens)
+		if err != nil {
+			return nil, err
 		}
 	}
 	return nutrientMap, nil
+}
+
+func extractNutrientValue(nutrientID string, foodID int, nutrientMap map[int]nndb.Nutrients, tokens []string) error {
+	if isValidNutrient(nutrientID) {
+		nutrient, _ := nutrientMap[foodID]
+
+		f, err := strconv.ParseFloat(strings.Trim(tokens[2], "~"), 64)
+		if err != nil {
+			return fmt.Errorf("Could not parse nutrient value for %v", nutrientID)
+		}
+
+		switch nutrientID {
+		case calories:
+			nutrient.Calories = f
+		case fat:
+			nutrient.Fat = f
+		case sugar:
+			nutrient.Sugar = f
+		case fiber:
+			nutrient.Fiber = f
+		case protein:
+			nutrient.Protein = f
+		}
+		nutrientMap[foodID] = nutrient
+	}
+	return nil
 }
 
 func (parser scannerParser) Parse() ([]nndb.Food, error) {
