@@ -1,6 +1,8 @@
 hash: b0b38d343eb76ac0ff579a363f03fc61c3fc69a9c6c14ed80cb783c839d16085
-updated: 2016-07-23T12:27:34.065784178-06:00
+updated: 2016-07-24T14:58:08.207218964-06:00
 imports:
+- name: github.com/codegangsta/cli
+  version: e43a9fbf1eb1e0c7a948b73e56ef23aec73c5d84
 - name: gopkg.in/urfave/cli.v1
   version: 1efa31f08b9333f1bd4882d61f9d668a70cd902e
 testImports: []
