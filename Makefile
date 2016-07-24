@@ -27,7 +27,7 @@ vet:
 	@go vet `glide nv`
 
 lint: 
-	@gometalinter --vendor --disable=gotype --dupl-threshold=90 ./...
+	@gometalinter --vendor --disable=gotype --dupl-threshold=90 --deadline=10s ./...
 
 fmt:
 	@gofmt -s -w .
