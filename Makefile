@@ -1,7 +1,6 @@
 NNDB_VERSION=sr28asc
 NNDB_ZIP=$(NNDB_VERSION).zip
-NNDB_URL=https://www.ars.usda.gov/SP2UserFiles/Place/12354500/Data/SR/SR28/dnload/sr28asc.zip
-
+NNDB_URL=https://www.ars.usda.gov/ARSUserFiles/80400525/Data/SR/SR28/dnload/sr28asc.zip
 default: build
 
 prepare: unzip dependencies tools
@@ -9,7 +8,7 @@ prepare: unzip dependencies tools
 tools: 	
 	go get -u github.com/Masterminds/glide
 	go get -u github.com/alecthomas/gometalinter
-	gometalinter --install --update 
+	gometalinter --install
 
 dependencies:
 	glide up 
@@ -27,13 +26,13 @@ vet:
 	go vet `glide nv`
 
 lint: 
-	gometalinter --vendor --disable=gotype --dupl-threshold=90 --deadline=10s ./...
+	glide nv | xargs -n1 gometalinter --disable=gotype --dupl-threshold=90 --deadline=30s --vendor
 
 fmt:
 	gofmt -s -w .
 
 compile: 
-	go build `glide nv` 
+	go build -race `glide nv` 
 
 build: fmt vet lint compile
 
