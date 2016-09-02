@@ -53,7 +53,7 @@ func (parser scannerParser) parseFoodGroups() (map[int]FoodGroup, error) {
 		line := parser.fdGroupScanner.Text()
 		tokens := strings.Split(line, "^")
 		if len(tokens) != 2 {
-			return nil, errors.New("Invalid Format")
+			return nil, fmt.Errorf("Invalid Format.  Expected 2 tokens and saw %d", len(tokens))
 		}
 
 		id, err := strconv.Atoi(strings.Trim(tokens[0], "~"))
@@ -76,7 +76,7 @@ func (parser scannerParser) parseNutrients() (map[int]Nutrients, error) {
 		line := parser.nutrDefScanner.Text()
 		tokens := strings.Split(line, "^")
 		if len(tokens) != 18 {
-			return nil, errors.New("Invalid Format")
+			return nil, fmt.Errorf("Invalid Format.  Expected 18 tokens and saw %d", len(tokens))
 		}
 
 		foodID, err := strconv.Atoi(strings.Trim(tokens[0], "~"))
@@ -178,6 +178,11 @@ func (parser scannerParser) Parse() ([]Food, error) {
 		return nil, err
 	}
 
+	weights, err := parser.parseWeights()
+	if err != nil {
+		return nil, err
+	}
+
 	food := []Food{}
 	for parser.foodDesScanner.Scan() {
 		line := parser.foodDesScanner.Text()
@@ -200,6 +205,7 @@ func (parser scannerParser) Parse() ([]Food, error) {
 			AlternateName: strings.Trim(tokens[3], "~"),
 			Manufacturer:  strings.Trim(tokens[5], "~"),
 			Nutrients:     nutrients[id],
+			Measurements:  weights[id],
 		})
 	}
 	return food, nil

@@ -1,6 +1,7 @@
 package nndb
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -40,7 +41,9 @@ var weightInput = `~01001~^1^1^~pat (1" sq, 1/3" high)~^5.0^^
 ~01002~^1^1^~pat (1" sq, 1/3" high)~^3.8^^
 ~01002~^2^1^~tbsp~^9.4^^
 ~01002~^3^1^~cup~^151^^
-~01002~^4^1^~stick~^76^^`
+~01002~^4^1^~stick~^76^^
+~01116~^1^4^~oz~^113^^
+~01116~^2^1^~cup (not packed)~^226^^`
 
 func TestParseNutrientDescription(t *testing.T) {
 
@@ -113,6 +116,11 @@ func TestParse(t *testing.T) {
 	if food[0].Name != "Yogurt, plain, whole milk, 8 grams protein per 8 ounce" {
 		t.Error(`Incorrect value for name`)
 	}
+	if len(food[0].Measurements) != 2 {
+		t.Error(`Incorrect number of measurements`)
+	}
+
+	fmt.Println(food[0])
 }
 
 func TestParseFoodGroup(t *testing.T) {
@@ -152,7 +160,7 @@ func TestParseWeight(t *testing.T) {
 	if error != nil {
 		t.Errorf(`Parse() returned an error %v`, error)
 	}
-	if weights != nil {
+	if weights == nil {
 		t.Errorf(`weights returned nil`)
 	}
 
@@ -160,6 +168,9 @@ func TestParseWeight(t *testing.T) {
 		t.Error(`incorrect number of measurements for weights[1001]`)
 	}
 
+	if weights[1001][1].Amount != 1 || weights[1001][1].Unit != "tbsp" || weights[1001][1].Weight != 14.2 {
+		t.Errorf("Measurement does not match expected.  1 tbsp : 14.2 expected, saw %v", weights[1001][1])
+	}
 }
 
 func TestParseWrongFileFormat(t *testing.T) {
