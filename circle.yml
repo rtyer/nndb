@@ -1,15 +1,6 @@
-
-machine:
-  environment:
-    IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
-
 dependencies:
-  override:
-    - mkdir -p "/home/ubuntu/.go_workspace/src/$IMPORT_PATH"
-    - rsync -azC --delete ./ "/home/ubuntu/.go_workspace/src/$IMPORT_PATH/"
+  pre:
     - make tools
-    - make dependencies
-    - make compile
 test:
  override:
     - make test  
