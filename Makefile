@@ -26,7 +26,7 @@ vet:
 	go vet `glide nv`
 
 lint: 
-	glide nv | xargs -n1 gometalinter --disable=gotype --dupl-threshold=90 --deadline=30s --vendor
+	glide nv | xargs -n1 gometalinter --disable=gotype --dupl-threshold=120 --deadline=30s --vendor
 
 fmt:
 	gofmt -s -w .
