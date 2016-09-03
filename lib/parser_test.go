@@ -1,7 +1,6 @@
 package nndb
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -119,8 +118,6 @@ func TestParse(t *testing.T) {
 	if len(food[0].Measurements) != 2 {
 		t.Error(`Incorrect number of measurements`)
 	}
-
-	fmt.Println(food[0])
 }
 
 func TestParseFoodGroup(t *testing.T) {
