@@ -8,7 +8,7 @@ prepare: unzip dependencies tools
 tools: 	
 	go get -u github.com/Masterminds/glide
 	go get -u github.com/alecthomas/gometalinter
-	gometalinter --install
+	gometalinter --install -u
 
 dependencies:
 	glide up 
@@ -26,15 +26,19 @@ vet:
 	go vet `glide nv`
 
 lint: 
-	glide nv | xargs -n1 gometalinter --disable=gotype --dupl-threshold=120 --deadline=30s --vendor
+	gometalinter --disable-all --enable=golint --enable=errcheck --enable=deadcode --enable=gosimple --enable=goconst --vendor ./...
+
+lint-full:
+	gometalinter --disable=gotype --dupl-threshold=120 --deadline=30s --vendor ./...
 
 fmt:
 	gofmt -s -w .
 
-compile: 
-	go build -race `glide nv` 
+build: fmt vet lint 
+	go install -race `glide nv`
 
-build: fmt vet lint compile
+quick: 
+	go install -race `glide nv`
 
 test: fmt vet lint
 	go test `glide nv` -cover -race
