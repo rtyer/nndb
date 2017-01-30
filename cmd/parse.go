@@ -15,8 +15,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 
 	nndb "github.com/rtyer/nndb/lib"
@@ -24,6 +26,7 @@ import (
 )
 
 var sourceDirectory string
+var outfile string
 
 // parseCmd represents the parse command
 var parseCmd = &cobra.Command{
@@ -31,7 +34,7 @@ var parseCmd = &cobra.Command{
 	Short: "Parses the standard format from national nutrient database into a consolidated format.",
 	Long:  `Parses the standard format from national nutrient database into a consolidated format.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("parse called with %v\n", sourceDirectory)
+		// fmt.Printf("parse called with %v\n", sourceDirectory)
 
 		parser, err := nndb.NewParser(
 			newReaderForFilename(sourceDirectory, nndb.FoodDesFile),
@@ -45,10 +48,12 @@ var parseCmd = &cobra.Command{
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println("foods:")
-			for _, e := range food {
-				fmt.Println(e)
+			b, err := json.Marshal(food)
+
+			if err != nil {
+				fmt.Println(err)
 			}
+			ioutil.WriteFile(outfile, b, 0644)
 		}
 	},
 }
@@ -57,11 +62,12 @@ func init() {
 	RootCmd.AddCommand(parseCmd)
 
 	parseCmd.Flags().StringVarP(&sourceDirectory, "source", "s", "", "source directory to read from")
+	parseCmd.Flags().StringVarP(&outfile, "outfile", "o", "", "file to output to")
 }
 
 func newReaderForFilename(folder string, filename string) io.Reader {
 	path := folder + "/" + filename
-	fmt.Printf("called with %v\n", path)
+	// fmt.Printf("called with %v\n", path)
 	file, err := os.Open(path)
 
 	if err != nil {
