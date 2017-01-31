@@ -34,8 +34,6 @@ var parseCmd = &cobra.Command{
 	Short: "Parses the standard format from national nutrient database into a consolidated format.",
 	Long:  `Parses the standard format from national nutrient database into a consolidated format.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// fmt.Printf("parse called with %v\n", sourceDirectory)
-
 		parser, err := nndb.NewParser(
 			newReaderForFilename(sourceDirectory, nndb.FoodDesFile),
 			newReaderForFilename(sourceDirectory, nndb.FoodGroupFile),
@@ -70,7 +68,6 @@ func init() {
 
 func newReaderForFilename(folder string, filename string) io.Reader {
 	path := folder + "/" + filename
-	// fmt.Printf("called with %v\n", path)
 	file, err := os.Open(path)
 
 	if err != nil {
