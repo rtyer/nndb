@@ -53,7 +53,10 @@ var parseCmd = &cobra.Command{
 			if err != nil {
 				fmt.Println(err)
 			}
-			ioutil.WriteFile(outfile, b, 0644)
+			err = ioutil.WriteFile(outfile, b, 0644)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	},
 }

@@ -26,9 +26,6 @@ vet:
 	go vet `glide nv`
 
 lint: 
-	gometalinter --disable-all --enable=golint --enable=errcheck --enable=deadcode --enable=gosimple --enable=goconst --vendor ./...
-
-lint-full:
 	gometalinter --disable=gotype --dupl-threshold=120 --deadline=30s --vendor ./...
 
 fmt:
