@@ -17,6 +17,17 @@ const (
 	fiber    = "291"
 )
 
+const (
+	//FoodGroupFile is the location for the food group file
+	FoodGroupFile = "FD_GROUP.txt"
+	//FoodDesFile is the location for the food description file
+	FoodDesFile = "FOOD_DES.txt"
+	//NutrDefFile is the location for the nutrient description file
+	NutrDefFile = "NUT_DATA.txt"
+	//WeightFile is the location for the nutrient weights file
+	WeightFile = "WEIGHT.txt"
+)
+
 type scannerParser struct {
 	foodDesScanner *bufio.Scanner
 	fdGroupScanner *bufio.Scanner
@@ -74,6 +85,7 @@ func (parser scannerParser) parseNutrients() (map[int]Nutrients, error) {
 	nutrientMap := make(map[int]Nutrients)
 	for parser.nutrDefScanner.Scan() {
 		line := parser.nutrDefScanner.Text()
+
 		tokens := strings.Split(line, "^")
 		if len(tokens) != 18 {
 			return nil, fmt.Errorf("Invalid Format.  Expected 18 tokens and saw %d", len(tokens))

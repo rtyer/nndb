@@ -8,13 +8,14 @@ prepare: unzip dependencies tools
 tools: 	
 	go get -u github.com/Masterminds/glide
 	go get -u github.com/alecthomas/gometalinter
-	gometalinter --install
+	gometalinter --install -u
 
 dependencies:
 	glide up 
 
 clean: 
 	rm -rf $(NNDB_VERSION) $(NNDB_ZIP) bin debug
+	find . -name debug.test | xargs rm
 
 $(NNDB_ZIP): 
 	wget $(NNDB_URL) 
@@ -26,15 +27,16 @@ vet:
 	go vet `glide nv`
 
 lint: 
-	glide nv | xargs -n1 gometalinter --disable=gotype --dupl-threshold=120 --deadline=30s --vendor
+	gometalinter --disable=gotype --dupl-threshold=120 --deadline=30s --vendor ./...
 
 fmt:
 	gofmt -s -w .
 
-compile: 
-	go build -race `glide nv` 
+build: fmt vet lint 
+	go install -race `glide nv`
 
-build: fmt vet lint compile
+quick: 
+	go install -race `glide nv`
 
 test: fmt vet lint
 	go test `glide nv` -cover -race
