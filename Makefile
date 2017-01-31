@@ -15,6 +15,7 @@ dependencies:
 
 clean: 
 	rm -rf $(NNDB_VERSION) $(NNDB_ZIP) bin debug
+	find . -name debug.test | xargs rm
 
 $(NNDB_ZIP): 
 	wget $(NNDB_URL) 
